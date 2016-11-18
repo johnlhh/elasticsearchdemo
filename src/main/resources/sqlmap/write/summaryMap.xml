@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SummaryMapper">
+
+
+   <!-- <insert id="insertCitySessionSummary" parameterType="Map">
+        INSERT INTO
+        summary(src,get_ticket,check_ticket,check_ticket_person,order_count,order_person_count,city_id,session)
+        values(#{src},#{get_ticket},#{check_ticket},#{check_ticket_person},#{order_count},#{order_person_count},#{city_id},#{session})
+    </insert>-->
+
+
+    <insert id="insertCitySessionSummary" useGeneratedKeys="true" parameterType="java.util.List">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT
+            LAST_INSERT_ID()
+        </selectKey>
+        insert into summary(src,get_ticket,check_ticket,check_ticket_person,order_count,order_person_count,city_id,session)
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.src},#{item.get_ticket},#{item.check_ticket},#{item.check_ticket_person},#{item.order_count},#{item.order_person_count},#{item.city_id},#{item.session})
+        </foreach>
+    </insert>
+
+    <select id="checkIsAlreadyImport" parameterType="Map" resultType="Integer">
+        select count(1) from summary where city_id = #{cityid} and session = #{session}
+    </select>
+
+   <!-- <select id="getcitySessionSummary" parameterType="Map" resultType="Map">
+        select
+        src as '渠道',
+        get_ticket as '索票量',
+        check_ticket as '检票量',
+        check_ticket_person as '检票人数',
+        order_count as '总订单量',
+        order_person_count as '开单人数'
+        from summary
+        where
+        city_id = #{cityid} and session = #{session}
+    </select>-->
+    <select id="getcitySessionSummary" parameterType="Map" resultType="Map">
+        select
+            <foreach collection="columnList" item="item" index="index" separator="," >
+                <if test="item == 'src'"> src</if>
+                <if test="item == 'get_ticket'"> get_ticket</if>
+                <if test="item == 'check_ticket'"> check_ticket</if>
+                <if test="item == 'check_ticket_person'"> check_ticket_person</if>
+                <if test="item == 'order_count'"> order_count</if>
+                <if test="item == 'order_person_count'"> order_person_count</if>
+            </foreach>
+        from summary
+        where
+        city_id = #{cityid} and session = #{session}
+        <if test="columnList != null and columnList.size() > 1">
+            order by
+            <foreach collection="columnList" item="item" index="index" separator="," >
+                <if test="item == 'get_ticket'"> get_ticket <if test="orderType == 1"> desc</if>  </if>
+                <if test="item == 'check_ticket'"> check_ticket <if test="orderType == 1"> desc</if> </if>
+                <if test="item == 'check_ticket_person'"> check_ticket_person <if test="orderType == 1"> desc</if> </if>
+                <if test="item == 'order_count'"> order_count <if test="orderType == 1"> desc</if> </if>
+                <if test="item == 'order_person_count'"> order_person_count <if test="orderType == 1"> desc</if> </if>
+            </foreach>
+        </if>
+        limit #{limit}
+    </select>
+
+    <select id="getCitys" resultType="Map">
+        select DISTINCT city_id from summary
+    </select>
+
+    <select id="getCitySessions" resultType="Integer" parameterType="Integer">
+        select DISTINCT session from summary where city_id = #{city_id} order by session desc
+    </select>
+
+    <select id="getCitySrcs" resultType="String" parameterType="Integer">
+        select DISTINCT src from summary where city_id = #{city_id} order by src asc
+    </select>
+
+    <select id="getSrcdatabySessions" parameterType="Map" resultType="Map">
+        select
+        <foreach collection="columnList" item="item" index="index" separator="," >
+            <if test="item == 'session'"> session</if>
+            <if test="item == 'get_ticket'"> get_ticket</if>
+            <if test="item == 'check_ticket'"> check_ticket</if>
+            <if test="item == 'check_ticket_person'"> check_ticket_person</if>
+            <if test="item == 'order_count'"> order_count</if>
+            <if test="item == 'order_person_count'"> order_person_count</if>
+        </foreach>
+        from summary where src = #{src} and city_id = #{city_id}
+        order by session asc
+        <if test="columnList != null and columnList.size() > 1">
+            ,
+            <foreach collection="columnList" item="item" index="index" separator="," >
+                <if test="item == 'get_ticket'"> get_ticket <if test="orderType == 1"> desc</if>  </if>
+                <if test="item == 'check_ticket'"> check_ticket <if test="orderType == 1"> desc</if> </if>
+                <if test="item == 'check_ticket_person'"> check_ticket_person <if test="orderType == 1"> desc</if> </if>
+                <if test="item == 'order_count'"> order_count <if test="orderType == 1"> desc</if> </if>
+                <if test="item == 'order_person_count'"> order_person_count <if test="orderType == 1"> desc</if> </if>
+            </foreach>
+        </if>
+        limit #{limit}
+    </select>
+
+
+</mapper>

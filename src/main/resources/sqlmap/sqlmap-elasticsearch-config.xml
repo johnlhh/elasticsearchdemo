@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="lazyLoadingEnabled" value="false" />
+        <setting name="cacheEnabled" value="true"/>
+		<setting name="callSettersOnNulls" value="true"/>
+	</settings>
+	<typeAliases>
+
+	</typeAliases>
+	
+	<!-- 增加mapper.xml文件 -->  
+	<mappers>
+        <mapper resource="sqlmap/ordermap.xml"/>
+	</mappers>
+</configuration>

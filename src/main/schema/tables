@@ -1,0 +1,22 @@
+
+/**
+*城市展届汇总表
+*/
+
+CREATE TABLE `summary` (
+`id`  int(11) NOT NULL AUTO_INCREMENT ,
+`src`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL ,
+`get_ticket`  int(11) NULL DEFAULT NULL ,
+`check_ticket`  int(11) NULL DEFAULT NULL ,
+`check_ticket_person`  int(11) NULL DEFAULT NULL ,
+`order_count`  int(11) NULL DEFAULT NULL ,
+`order_person_count`  int(11) NULL DEFAULT NULL ,
+`city_id`  int(11) NULL DEFAULT NULL ,
+`session`  int(11) NULL DEFAULT NULL ,
+PRIMARY KEY (`id`)
+)
+ENGINE=InnoDB
+DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci
+AUTO_INCREMENT=1
+ROW_FORMAT=COMPACT
+;

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderMapper">
+
+
+    <resultMap id="orderResultMap" type="com.huamo.appservice.entity.Order">
+        <id property="id" column="id"></id>
+        <id property="order_num" column="order_num"></id>
+        <id property="sub_order_num" column="sub_order_num"></id>
+        <id property="order_type" column="order_type"></id>
+        <id property="activity_id" column="activity_id"></id>
+        <id property="supplier_id" column="supplier_id"></id>
+        <id property="supplier_name" column="supplier_name"></id>
+        <id property="user_id" column="user_id"></id>
+        <id property="create_time" column="create_time"></id>
+    </resultMap>
+
+    <select id="queryOrders" resultMap="orderResultMap">
+        select
+        id,
+        order_num,
+        sub_order_num,
+        order_type,
+        activity_id,
+        supplier_id,
+        supplier_name,
+        user_id,
+        create_time
+        from hxjb_order
+    </select>
+
+    <select id="monthsOrderCount" parameterType="Map" resultType="Map" >
+         select
+                count(1) as count,
+                date_format(create_time,'%m') as month,
+                order_type
+                from hxjb_order
+                where date_format(create_time,'%Y') = #{year}
+                GROUP BY date_format(create_time,'%m'),order_type
+                ORDER BY date_format(create_time,'%m')
+    </select>
+    
+    <select id="citySessionTicketAndOrder" parameterType="Map" resultType="Map">
+    select a.src as '渠道',
+            count(a.userid) '索票量',
+            sum(ifnull(check_ticket_cnt,0)) '检票量',
+            count(distinct c.uid) '检票人数',
+            sum(ifnull(order_cnt,0)) '总订单量',
+            count(distinct b.user_id) '开单人数'
+            from (
+            select distinct src,userid from hxjb_get_ticket a
+            where cityid = #{cityid} and session = #{session} and src is not null and LENGTH(src) > 1  group by userid
+            ) a left join
+            (
+            select user_id,count(*) order_cnt
+            from hxjb_order
+            where venue_cityid = #{cityid} and venue_session = #{session}
+            and order_status in (2,4,6,8,10,14,17,18)
+            and order_type in (2,3)
+            and supplier_name not like '%测试%'
+            and supplier_name  not like '%测试%'
+            and supplier_name not like '%华夏家博%'
+            and del_flag=1
+            group by user_id
+            )b on a.userid=b.user_id
+            left join (
+            select uid,count(*) check_ticket_cnt from hxjb_ticket where cityid = #{cityid} and session_num = #{session} and check_time is not null
+            group by uid
+            )c on a.userid=c.uid
+            group by src
+    </select>
+
+
+    <select id="citySessionSummary" parameterType="Map" resultType="Map">
+        select
+        a.cityid as city_id,
+        a.session as session,
+        a.src as src,
+        count(a.userid) get_ticket,
+        sum(ifnull(check_ticket_cnt,0)) check_ticket,
+        count(distinct c.uid) check_ticket_person,
+        sum(ifnull(order_cnt,0)) order_count,
+        count(distinct b.user_id) order_person_count
+        from (
+        select distinct src,userid,cityid,session from hxjb_get_ticket a
+        where cityid = #{cityid} and session = #{session} and src is not null and LENGTH(src) > 1  group by userid
+        ) a left join
+        (
+        select user_id,count(*) order_cnt
+        from hxjb_order
+        where venue_cityid = #{cityid} and venue_session = #{session}
+        and order_status in (2,4,6,8,10,14,17,18)
+        and order_type in (2,3)
+        and supplier_name not like '%测试%'
+        and supplier_name  not like '%测试%'
+        and supplier_name not like '%华夏家博%'
+        and del_flag=1
+        group by user_id
+        )b on a.userid=b.user_id
+        left join (
+        select uid,count(*) check_ticket_cnt from hxjb_ticket where cityid = #{cityid} and session_num = #{session} and check_time is not null
+        group by uid
+        )c on a.userid=c.uid
+        group by src
+    </select>
+
+</mapper>
